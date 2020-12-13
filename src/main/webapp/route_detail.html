@@ -1,0 +1,267 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <title>XingTravel-Route Detail</title>
+    <link rel="stylesheet" type="text/css" href="css/bootstrap.min.css">
+    <link rel="stylesheet" type="text/css" href="css/common.css">
+    <link rel="stylesheet" type="text/css" href="css/route-detail.css">
+</head>
+
+<body>
+<div id="header"></div>
+    <!-- detail start -->
+    <div class="wrap">
+        <div class="bread_box">
+            <a href="index.html">Home</a>
+            <span> &gt;</span>
+            <a id="categoryLink"></a><span> &gt;</span>
+            <a href="#" id="routeLink"></a>
+        </div>
+        <div class="prosum_box">
+            <dl class="prosum_left">
+                <dt id="dt">
+                    <!--<img alt="" class="big_img"  src="">-->
+                </dt>
+                <dd id="dd">
+                    <!--<a class="up_img up_img_disable"></a>-->
+                    <!--<a title="" class="little_img" data-bigpic="http://www.jinmalvyou.com/Public/uploads/goods_img/img_size4/201703/m40920d0669855e745d97f9ad1df966ebb.jpg">-->
+                        <!--<img src="http://www.jinmalvyou.com/Public/uploads/goods_img/img_size2/201703/m20920d0669855e745d97f9ad1df966ebb.jpg">-->
+                    <!--</a>-->
+                    <!--<a class="down_img down_img_disable" style="margin-bottom: 0;"></a>-->
+                </dd>
+            </dl>
+            <div class="prosum_right">
+               <p class="pros_title" id="rname"></p>
+                <p class="hot" id="routeIntroduce"></p>
+                <div class="pros_other">
+                    <p >Seller : <span id="sname"></span></p>
+                    <p >Phone : <span id="consphone"></span></p>
+                    <p >Address : <span id="address"></span></p>
+                </div>
+                <div class="pros_price">
+                    <p class="price"><strong id="price"></strong><span>start</span></p>
+                    <p class="collect">
+                        <a class="btn" id="favorite"><i class="glyphicon glyphicon-heart-empty"></i>Favorite</a>
+                        <!--<a  class="btn already" disabled="disabled"><i class="glyphicon glyphicon-heart-empty"></i>Favorite</a>-->
+                        <span id="favoriteCount"></span>
+                    </p>
+                </div>        
+            </div>
+        </div>
+        <div class="you_need_konw">
+            <span>Notice</span>
+            <div class="notice">
+                <p>1 : some notice content is needed to fill this part<p>
+                <p>2 : some notice content is needed to fill this part<p>
+                <p>3 : some notice content is needed to fill this part<p>
+                <p>4 : some notice content is needed to fill this part<p>
+                <p>5 : some notice content is needed to fill this part<p>
+                <p>6 : some notice content is needed to fill this part<p>
+                <p>7 : some notice content is needed to fill this part<p>
+                <p>8 : some notice content is needed to fill this part<p>
+                <p>9 : some notice content is needed to fill this part<p>
+            </div>
+        </div>
+    </div>
+
+    <div id="footer"></div>
+        <!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
+    <script src="js/jquery-3.3.1.js"></script>
+    <!-- Include all compiled plugins (below), or include individual files as needed -->
+    <script src="js/bootstrap.min.js"></script>
+    <script type="text/javascript" src="js/include.js"></script>
+    <script type="text/javascript" src="js/getParameter.js"></script>
+
+    <script>
+        /**
+         * auto play images in carousel
+         * */
+        function auto_play() {
+            var cur_index = $('.prosum_left dd').find('a.cur_img').index();
+            cur_index = cur_index - 1;
+            var num = $('.little_img').length;
+            var max_index = 3;
+            if ((num - 1) < 3) {
+                max_index = num - 1;
+            }
+            if (cur_index < max_index) {
+                var next_index = cur_index + 1;
+                var big_pic = $('.little_img:eq(' + next_index + ')').data('bigpic');
+                $('.little_img').removeClass('cur_img');
+                $('.little_img:eq(' + next_index + ')').addClass('cur_img');
+                $('.big_img').attr('src', big_pic);
+            } else {
+                var big_pic = $('.little_img:eq(0)').data('bigpic');
+                $('.little_img').removeClass('cur_img');
+                $('.little_img:eq(0)').addClass('cur_img');
+                $('.big_img').attr('src', big_pic);
+            }
+        }
+
+        /**
+         * switch big image when move over small image in carousel
+         * */
+        function load_img_action(){
+            // switch img when click
+            $('.little_img').on('mousemove', function() {
+                $('.little_img').removeClass('cur_img');
+                var big_pic = $(this).data('bigpic');
+                $('.big_img').attr('src', big_pic);
+                $(this).addClass('cur_img');
+            });
+            // switch img
+            var picindex = 0;
+            var nextindex = 4;
+            $('.down_img').on('click',function(){
+                var num = $('.little_img').length;
+                if((nextindex + 1) <= num){
+                    $('.little_img:eq('+picindex+')').hide();
+                    $('.little_img:eq('+nextindex+')').show();
+                    picindex = picindex + 1;
+                    nextindex = nextindex + 1;
+                }
+            });
+            $('.up_img').on('click',function(){
+                var num = $('.little_img').length;
+                if(picindex > 0){
+                    $('.little_img:eq('+(nextindex-1)+')').hide();
+                    $('.little_img:eq('+(picindex-1)+')').show();
+                    picindex = picindex - 1;
+                    nextindex = nextindex - 1;
+                }
+            });
+            // auto play
+            //var timer = setInterval(auto_play, 5000);
+        }
+
+
+        $(function () {
+            /**
+             * send ajax request to fetch route detail info
+             * */
+            new Promise(function (resolve, reject) {
+                var rid = getParameter('rid');
+                $.get("route/findOne", {rid : rid}, function (route) {
+                    if(route != null) {resolve(route);}
+                    else {reject(route);}
+                });
+            })
+            /**
+             * fill dynamic content in web page
+             * */
+            .then(function (route) {
+                $('#rname').html(route.rname);
+                $('#routeLink').html(route.rname);
+                $('#categoryLink').html(route.category.cname);
+                var dest = "route_list.html?cid=" + route.category.cid;
+                $('#categoryLink').prop("href", dest);
+                $('#routeIntroduce').html(route.routeIntroduce);
+                $('#price').html('&#36;'+route.price);
+                $('#sname').html(route.seller.sname);
+                $('#consphone').html(route.seller.consphone);
+                $('#address').html(route.seller.address);
+                $('#favoriteCount').html("Liked By "+route.count+" people");
+                $('#dt').html('<img alt="" class="big_img"  src="'+route.routeImgList[0].bigPic+'">');
+                var ddstr = '<a class="up_img up_img_disable"></a>';
+                for(var i = 0 ; i < route.routeImgList.length ; i++) {
+                    var img = route.routeImgList[i];
+                    var aStr;
+                    if( i < 4) {
+                        aStr = '<a title="" class="little_img" data-bigpic="'+img.bigPic+'">\n' +
+                            '<img src="'+img.bigPic+'">\n' +
+                            '</a>';
+                    } else {
+                        aStr = '<a title="" class="little_img" data-bigpic="'+img.bigPic+'" style="display: none;">\n' +
+                            '<img src="'+img.bigPic+'">\n' +
+                            '</a>';
+                    }
+                    ddstr += aStr;
+                }
+                ddstr += '<a class="down_img down_img_disable" style="margin-bottom: 0;"></a>';
+                $('#dd').html(ddstr);
+                load_img_action();
+                return Promise.resolve(route.rid);
+            })
+            /**
+             * set Favorite button style
+             */
+            .then(function (rid) {
+                $.get("route/isFavorite", {rid : rid} , function (flag) {
+                    if(flag) {
+                        $('#favorite').addClass("btn already");
+                        // $('#favorite').attr("disabled", "disabled");
+                    } else {}
+                });
+            })
+            .catch(function (reason) {
+
+            });
+        });
+        /**
+         * event handler for favorite button
+         */
+        $(function () {
+            $('#favorite').click(function () {
+                var rid = getParameter("rid");
+                /**
+                 * find user whether login
+                 * */
+                new Promise(function (resolve, reject) {
+                    $.get('user/findOne', {}, function (user) {
+                        if(user) {resolve(user);}
+                        else {reject("Please login before like the route.");}
+                    })
+                })
+                /**
+                 * find user whether likes the route
+                 * */
+                .then(function (user) {
+                    return new Promise(function (resolve, reject) {
+                        $.get("route/isFavorite", {rid:rid}, function (flag) {
+                            if(flag) {
+                                reject(flag);
+                            } else {
+                                resolve(flag);
+                            }
+                        });
+                    });
+                }, function (reason) {
+                    alert(reason);
+                    location.href = 'login.html';
+                })
+                /**
+                 * add route to favorite or remove route from favorate
+                 * */
+                .then(function (result) {
+                    return new Promise(function (resolve, reject) {
+                        $.get("route/addFavorite", {rid : rid}, function () {
+                            $('#favorite').addClass("btn already");
+                            // $('#favorite').attr("disabled", "disabled");
+                            resolve(rid);
+                        });
+                    });
+                }, function (reason) {
+                    return new Promise(function (resolve, reject) {
+                        $.get("route/removeFavorite", {rid : rid}, function () {
+                            $('#favorite').removeClass("btn already");
+                            // $('#favorite').attr("disabled", "");
+                            resolve(rid);
+                        });
+                    });
+                })
+                 /**
+                  * update likes info
+                  * */
+                .then(function (rid) {
+                    $.get('route/findOne',{rid:rid}, function (route) {
+                        $('#favoriteCount').html("Liked By "+route.count+" people");
+                    })
+                })
+            });
+        });
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,91 @@
+<script type="text/javascript">
+    $('head').append('<link rel="stylesheet" type="text/css" href="css/bootstrap.min.css">');
+    $('head').append("<script src='https://cdn.bootcss.com/html5shiv/3.7.3/html5shiv.min.js'><\/script>");
+    $('head').append('<script src="https://cdn.bootcss.com/respond.js/1.4.2/respond.min.js"><\/script>');
+    $('head').append('<script src="js/getParameter.js"><\/script>');
+    $(function(){
+        /**
+        * check if current user has login
+        * */
+        $.get("user/findOne", {}, function(user){
+            // uid: 1, name: ''
+            if(user == null || user == undefined) {
+                $(".login").css("display", "none");
+                $(".login_out").css("display", "block");
+                return;
+            }
+            $(".login").css("display", "block");
+            $(".login_out").css("display", "none");
+            var msg = "Welcome back, " + user.name;
+            $("#span_username").html(msg);
+        });
+
+        /**
+         * query all the categories in the nav bar
+         * */
+        $.get("category/findAll", {}, function(data){
+            // data = [{cid: id, cname: name}, {}]
+            var list = '<li><a href="index.html">Home</a></li>';
+            $.each(data, function(idx, e){
+                // list += '<li ><a href="route_list.html?cid='+e.cid+'">'+e.cname+'</a></li>';
+                list += '<li ><a href="route_list.html?cid=5">'+e.cname+'</a></li>';
+            });
+            list += '<li><a href="favoriterank.html">Favorite Rank</a></li>';
+            $('#category').append(list);
+        });
+
+        /**
+         * search button click event handler
+         * */
+        $('#search_button').click(function(){
+            var rname = $('#search_input').val();
+            var cid = getParameter("cid");
+            location.href = "route_list.html?cid="+cid+"&rname="+rname+"";
+        });
+    });
+</script>
+    <header id="header" class="container-fluid">
+        <div class="top_banner row-fluid">
+            <img src="images/top-animation.gif" style="width: 100%; height: 300px" alt="banner" class="img-responsive">
+        </div>
+        <div class="shortcut row-fluid">
+            <div class="col-md-11">
+                <div class="login_out" style="display: none;">
+                    <a href="login.html">Login</a>
+                    <a href="register.html">Register</a>
+                </div>
+                <div class="login" style="display: none;">
+                    <span id="span_username"></span>
+                    <a href="myfavorite.html" class="collection">My Favorite</a>
+                    <a href="javascript:location.href='user/exit';">Logout</a>
+                </div>
+            </div>
+            <div class="col-md-1"></div>
+        </div>
+
+        <!--search bar-->
+        <div class="header_wrap row-fluid">
+            <div class="logo col-md-4">
+                <a href="index.html"><img src="images/logo.png" style="width:70px;height: 70px" alt="site logo"></a>
+                <p class="logo_name">Xing Travel Website</p>
+            </div>
+            <div class="search col-md-4">
+                <input name="" id="search_input" type="text" placeholder="Please input route name" class="search_input" autocomplete="off">
+                <a href="javascript:;" id="search_button" class="search-button">Search</a>
+            </div>
+            <div class="hottel col-md-4">
+                <div class="hot_pic">
+                    <img src="images/hot_tel.jpg" alt="">
+                </div>
+                <div class="hot_tel">
+                    <p class="hot_time">ContactUs&ensp;:&ensp;(9:00-6:00)</p>
+                    <p class="hot_num">888-777-6666</p>
+                </div>
+            </div>
+        </div>
+    </header>
+     <!-- navigation bar -->
+    <div class="navitem">
+        <ul class="nav" id="category"></ul>
+    </div>
+    

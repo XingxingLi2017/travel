@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <title>XingTravel-My Favorite</title>
+        <link href="css/bootstrap.min.css" rel="stylesheet">
+        <link rel="stylesheet" type="text/css" href="css/common.css">
+        <link rel="stylesheet" href="css/index.css">
+       <style>
+           .tab-content .row>div {
+            margin-top: 16px;
+           } 
+           .tab-content {
+            margin-bottom: 36px;
+           }
+       </style>
+       <script src="js/jquery-3.3.1.js"></script>
+    </head>
+    <body>
+    <div id="header"></div>
+         <!-- ranking start-->
+        <section id="content">            
+            <section class="hemai_jx">
+                <div class="jx_top">
+                    <div class="jx_tit">
+                        <img src="images/icon_5.jpg" alt="">
+                        <span>My Favorite</span>
+                    </div>                    
+                </div>
+                <div class="jx_content">
+                    <!-- Content panes -->
+                    <div class="tab-content">
+                        <div role="tabpanel" class="tab-pane active" id="home">
+                            <div class="row" id="myFavorite">
+                                <!--<div class="col-md-3">-->
+                                    <!--<a href="route_detail.html">-->
+                                        <!--<img src="images/collection_pic.jpg" alt="">-->
+                                        <!--<div class="has_border">-->
+                                            <!--<h3>Place the route name here</h3>-->
+                                            <!--<div class="price">Price:&ensp;<em>&#36;</em><strong>889</strong>&ensp;<em>start</em></div>-->
+                                        <!--</div>-->
+                                    <!--</a>-->
+                                <!--</div>-->
+                            </div>
+                        </div>                       
+                    </div>
+                </div>
+                <div class="pageNum">
+                    <ul id="pageNum">
+                        <li><a href="">First</a></li>
+                        <li class="threeword"><a href="#">Previous</a></li>
+                        <li><a href="#">1</a></li>
+                        <li><a href="#">2</a></li>
+                        <li><a href="#">3</a></li>
+                        <li><a href="#">4</a></li>
+                        <li><a href="#">5</a></li>
+                        <li><a href="#">6</a></li>
+                        <li><a href="#">7</a></li>
+                        <li><a href="#">8</a></li>
+                        <li><a href="#">9</a></li>
+                        <li><a href="#">10</a></li>
+                        <li class="threeword"><a href="javascript:;">Next</a></li>
+                        <li class="threeword"><a href="javascript:;">Last</a></li>
+                    </ul>
+                </div>
+            </section>                      
+        </section>
+    	<div id="footer"></div>
+        <script type="text/javascript" src="js/include.js"></script>
+        <script>
+            $(function () {
+                /**
+                 * find whether current user has login
+                 */
+                new Promise(function (resolve, reject) {
+                    $.get("user/findOne",{},function (user) {
+                        if(user) {
+                            resolve(user);
+                        } else {
+                            reject("You haven't login, please login first");
+                        }
+                    });
+                })
+                    /**
+                     * load page
+                     * */
+                    .then(function (user) {
+                        loadPageBean();
+                    })
+                    .catch(function (reason) {
+                        alert(reason);
+                        location.href = "login.html";
+                    });
+            });
+
+            function loadPageBean(currentPage) {
+                new Promise(function (res, rej) {
+                    $.get("route/findFavoriteByPage", {currentPage:currentPage}, function (pb) {
+                        if(pb) {
+                            res(pb);
+                        } else {
+                            rej("There is something wrong, we can't get any data from server, please try later.");
+                        }
+                    })
+                })
+                .then(function (pb) {
+                    /**
+                     * set up the page bar
+                     * */
+                    var bar = '<li><a href="javascript:loadPageBean(1)">First</a></li>\n' +
+                        '<li class="threeword"><a href="javascript:loadPageBean('+(pb.currentPage - 1)+')">Previous</a></li>';
+                    var begin = pb.currentPage - 5 > 0 ? pb.currentPage - 5 : 1;
+                    var end = begin + 9 <= pb.totalPage ? begin + 9 : pb.totalPage;
+                    for(var i = begin  ; i <= end ; i++) {
+                        var e;
+                        if(pb.currentPage == i) {
+                            e = '<li class = "curPage"><a href="javascript:loadPageBean('+i+')">' + i + '</a></li>';
+                        } else {
+                            e = '<li><a href="javascript:loadPageBean('+i+')">' + i + '</a></li>';
+                        }
+                        bar += e;
+                    }
+                    bar += '<li class="threeword"><a href="javascript:loadPageBean('+ (pb.currentPage + 1) +')">Next</a></li>\n' +
+                        '<li class="threeword"><a href="javascript:loadPageBean('+pb.totalPage+')">Last</a></li>';
+                    $('#pageNum').html(bar);
+
+                    /**
+                     * set up the page content
+                     * */
+                    var list = pb.list;
+                    var content = '';
+                    for(var i = 0 ; i < list.length ; i++) {
+                        var route = list[i].route;
+                        content += '<div class="col-md-3">\n' +
+                            '<a href="route_detail.html?rid='+route.rid+'">\n' +
+                            '<img src="'+route.rimage+'" alt="">\n' +
+                            '<div class="has_border">\n' +
+                            '<h3>'+route.rname+'</h3>\n' +
+                            '<div class="price">Price:&ensp;<em>&#36;</em><strong>'+route.price+'</strong>&ensp;<em>start</em></div>\n' +
+                            '</div>\n' +
+                            '</a>\n' +
+                            '</div>';
+                    }
+                    $('#myFavorite').html(content);
+                })
+                .catch(function (reason) { alert(reason); });
+            }
+        </script>
+    </body>
+</html>

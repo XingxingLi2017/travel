@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <title>XingTravel-Favorite Rank</title>
+        <link rel="stylesheet" type="text/css" href="css/common.css">
+        <link rel="stylesheet" type="text/css" href="css/ranking-list.css">
+        <script src="js/jquery-3.3.1.js"></script>
+    </head>
+    <body>
+    <div id="header"></div>
+        <div class="contant">
+            <div class="shaixuan">
+                <span>Route Name</span>
+                <input type="text" id="rname">
+                <span>Price</span>
+                <input type="text" id="priceFrom">~<input type="text" id="priceTo">
+                <button id="search_btn">Search</button>
+            </div>
+            <div class="list clearfix">
+                <ul id="rankContent">
+                    <li>
+                        <span class="num one">1</span>
+                        <a href="route_detail.html"><img src="images/jiangxuan_4.jpg" alt=""></a>
+                        <h4><a href="route_detail.html">There is something should be filled.</a></h4>
+                        <p>
+                            <b class="price">&dollar;&ensp;<span>899</span>&ensp;start</b>
+                            <span class="shouchang">Liked By 450 People</span>
+                        </p>
+                    </li>
+                    <li>
+                        <span class="num two">2</span>
+                         <a href="route_detail.html"><img src="images/jiangxuan_4.jpg" alt=""></a>
+                        <h4><a href="route_detail.html">There is something should be filled.</a></h4>
+                        <p>
+                            <b class="price">&dollar;&ensp;<span>899</span>&ensp;start</b>
+                            <span class="shouchang">Liked By 450 People</span>
+                        </p>
+                    </li>
+                    <li>
+                        <span class="num">3</span>
+                         <a href="route_detail.html"><img src="images/jiangxuan_4.jpg" alt=""></a>
+                        <h4><a href="route_detail.html">There is something should be filled.</a></h4>
+                        <p>
+                            <b class="price">&dollar;&ensp;<span>899</span>&ensp;start</b>
+                            <span class="shouchang">Liked By 450 People</span>
+                        </p>
+                    </li>
+                </ul>
+            </div>
+            <div class="pageNum">
+                <ul id="pageNum">
+                    <li><a href="">First</a></li>
+                    <li class="threeword"><a href="#">Previous</a></li>
+                    <li><a href="#">1</a></li>
+                    <li class="threeword"><a href="javascript:;">Next</a></li>
+                    <li class="threeword"><a href="javascript:;">Last</a></li>
+                </ul>
+            </div>
+        </div>
+   		 <div id="footer"></div>
+    <script type="text/javascript" src="js/include.js"></script>
+    <script>
+        $(function () {
+            loadPage();
+            $('#search_btn').click(function () {
+                var rname = $('#rname').val().trim();
+                var priceFrom = $('#priceFrom').val().trim();
+                var priceTo = $('#priceTo').val().trim();
+                if((priceFrom != "" && !isDouble(priceFrom)) || (priceTo != "" && !isDouble(priceTo))) {
+                    alert("Please input number for price.")
+                    return;
+                }
+                loadPage(1, rname, priceFrom, priceTo);
+            });
+        });
+        function isDouble(str) {
+            var regex=/\d+(\.\d+)?/;
+            return regex.test(str);
+        }
+        /**
+         * send ajax request to route/findFavoriteRankPage , get top favorite routes by pages
+         * */
+        function loadPage(currentPage, rname, priceFrom, priceTo) {
+
+            new Promise(function (resolve, reject) {
+                $.get("route/findFavoriteRankPage",
+                    {
+                        currentPage:currentPage,
+                        rname:rname,
+                        priceFrom:priceFrom,
+                        priceTo:priceTo
+                    },
+                    function (pb) {
+                        if(pb.list.length > 0) {
+                            resolve(pb);
+                        } else {
+                            reject("Didn't get any data from server under current search condition.");
+                        }
+                    }
+                )
+            }).then(function (pb) {
+                /**
+                 * load page content
+                 * */
+                var list = pb.list;
+                var content = '';
+                for(var i = 0 ; i < list.length ; i++) {
+                    var route = list[i].route;
+                    var e;
+                    if(i == 0 && pb.currentPage == 1) {
+                        e = '                    <li>\n' +
+                            '                        <span class="num one">1</span>\n' +
+                            '                        <a href="route_detail.html?rid='+route.rid+'"><img src="'+route.rimage+'" alt=""></a>\n' +
+                            '                        <h4><a href="route_detail.html?rid='+route.rid+'">'+route.rname+'</a></h4>\n' +
+                            '                        <p>\n' +
+                            '                            <b class="price">&dollar;&ensp;<span>'+route.price+'</span>&ensp;start</b>\n' +
+                            '                            <span class="shouchang">Liked By '+route.count+' People</span>\n' +
+                            '                        </p>\n' +
+                            '                    </li>';
+                    } else if(i == 1 && pb.currentPage == 1){
+                        e = '                    <li>\n' +
+                            '                        <span class="num two">2</span>\n' +
+                            '                        <a href="route_detail.html?rid='+route.rid+'"><img src="'+route.rimage+'" alt=""></a>\n' +
+                            '                        <h4><a href="route_detail.html?rid='+route.rid+'">'+route.rname+'</a></h4>\n' +
+                            '                        <p>\n' +
+                            '                            <b class="price">&dollar;&ensp;<span>'+route.price+'</span>&ensp;start</b>\n' +
+                            '                            <span class="shouchang">Liked By '+route.count+' People</span>\n' +
+                            '                        </p>\n' +
+                            '                    </li>';
+                    } else {
+                        e = '                    <li>\n' +
+                            '                        <span class="num">'+( i + 1 + (pb.currentPage - 1) * pb.pageSize )+'</span>\n' +
+                            '                        <a href="route_detail.html?rid='+route.rid+'"><img src="'+route.rimage+'" alt=""></a>\n' +
+                            '                        <h4><a href="route_detail.html?rid='+route.rid+'">'+route.rname+'</a></h4>\n' +
+                            '                        <p>\n' +
+                            '                            <b class="price">&dollar;&ensp;<span>'+route.price+'</span>&ensp;start</b>\n' +
+                            '                            <span class="shouchang">Liked By '+route.count+' People</span>\n' +
+                            '                        </p>\n' +
+                            '                    </li>';
+                    }
+                    content += e;
+                }
+                $('#rankContent').html(content);
+
+                /**
+                 * load page bar
+                 * */
+                var bar = '<li><a href="javascript:loadPage(1, \''+rname+'\', \''+priceFrom+'\', \''+priceTo+'\')">First</a></li>\n' +
+                    '<li class="threeword"><a href="javascript:loadPage('+(pb.currentPage - 1)+',\''+rname+'\', \''+priceFrom+'\', \''+priceTo+'\')">Previous</a></li>';
+                var begin = pb.currentPage - 5 > 0 ? pb.currentPage - 5 : 1;
+                var end = begin + 9 <= pb.totalPage ? begin + 9 : pb.totalPage;
+                for(var i = begin  ; i <= end ; i++) {
+                    var e;
+                    if(pb.currentPage == i) {
+                        e = '<li class = "curPage"><a href="javascript:loadPage('+i+',\''+rname+'\', \''+priceFrom+'\', \''+priceTo+'\')">' + i + '</a></li>';
+                    } else {
+                        e = '<li><a href="javascript:loadPage('+i+', \''+rname+'\', \''+priceFrom+'\', \''+priceTo+'\')">' + i + '</a></li>';
+                    }
+                    bar += e;
+                }
+                bar += '<li class="threeword"><a href="javascript:loadPage('+ (pb.currentPage + 1) +',\''+rname+'\', \''+priceFrom+'\', \''+priceTo+'\')">Next</a></li>\n' +
+                    '<li class="threeword"><a href="javascript:loadPage('+pb.totalPage+',\''+rname+'\', \''+priceFrom+'\', \''+priceTo+'\')">Last</a></li>';
+                $('#pageNum').html(bar);
+
+            }).catch(function (reason) {
+                alert(reason);
+            });
+        }
+    </script>
+    </body>
+</html>
